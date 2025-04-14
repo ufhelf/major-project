@@ -5,3 +5,7 @@ class SiteUser(models.Model):
     password = models.CharField(max_length=25)
     objects = models.Manager()
 
+class ImageSet(models.Model):
+    filename = models.CharField(max_length=50)
+    image = models.ImageField(upload_to="images")
+    objects = models.Manager()
