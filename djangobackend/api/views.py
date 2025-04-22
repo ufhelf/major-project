@@ -1,10 +1,8 @@
 from http import HTTPStatus
 from django.http import HttpResponse, JsonResponse, QueryDict
-from django.core import serializers
-from rest_framework import generics
 from rest_framework.decorators import api_view
-from .models import SiteUser, ImageSet
-from .serializers import UserSerializer, ImageSerializer
+from .models import *
+from .serializers import *
 from rest_framework.response import Response
 from api.serializers import UserSerializer
 
@@ -17,13 +15,35 @@ def get_user(request, username, password):
     return Response(UserSerializer(user).data)
 
 @api_view(["POST"])
-def PostImage(request):
-    try:    
-        uploaded_file = request.FILES.get('file')
-        image = ImageSet.objects.create(filename=uploaded_file.name, image=uploaded_file)
-        return JsonResponse({"message": "Image saved successfully"})
+def PostImage(request, setname):   
+    uploaded_file = request.FILES.get('file')
+    img_set = ImageSet.objects.get(setname=setname)
+    image = UploadImage.objects.create(filename=uploaded_file.name, image=uploaded_file, setname=img_set)
+    return JsonResponse({"message": "Image saved successfully"})
+    
+@api_view(["GET"])
+def GetAllImages(request): #Get all images, for testing only
+    images = UploadImage.objects.all()
+    serializer = ImageSerializer(images, many=True, context={'request': request})
+    return Response(serializer.data)
+
+@api_view(["GET"])
+def GetImageSets(request):
+    sets = ImageSet.objects.all()
+    #set = ImageSet.objects.get(setname="set1")
+    #print(set.setname)
+    s = ImageSetSerialiser(sets, many=True)
+    return Response(s.data)
+
+@api_view(["GET"])
+def GetImageBySet(request, setname):
+    try:
+        IMGSET = ImageSet.objects.get(setname=setname)
     except:
-        return Response(status=HTTPStatus.BAD_REQUEST)
+        return Response(status=HTTPStatus.NOT_FOUND)
+    images = UploadImage.objects.filter(setname=IMGSET)
+    s = ImageSerializer(images, many=True, context={'request': request})
+    return Response(s.data)
 
 #Extra code incase
 '''

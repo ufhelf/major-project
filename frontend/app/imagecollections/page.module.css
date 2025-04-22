@@ -1,0 +1,99 @@
+.navbar {
+    height: 100%;
+    visibility: hidden;
+    width: 150px;
+    padding: var(--mantine-spacing-md);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    border-right: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  }
+  
+  .navbarMain {
+    flex: 1;
+  }
+  
+  .header {
+    padding-bottom: var(--mantine-spacing-md);
+    margin-bottom: calc(var(--mantine-spacing-md) * 1.5);
+    border-bottom: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  }
+  
+  .footer {
+    padding-top: var(--mantine-spacing-md);
+    margin-top: var(--mantine-spacing-md);
+    border-top: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  }
+  
+  .link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    font-size: var(--mantine-font-size-sm);
+    color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-1));
+    padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+    border-radius: var(--mantine-radius-sm);
+    font-weight: 500;
+  
+    @mixin hover {
+      background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+      color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+  
+      .linkIcon {
+        color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+      }
+    }
+  
+    &[data-active] {
+      &,
+      &:hover {
+        background-color: var(--mantine-color-blue-light);
+        color: var(--mantine-color-blue-light-color);
+  
+        .linkIcon {
+          color: var(--mantine-color-blue-light-color);
+        }
+      }
+    }
+  }
+  
+  .linkIcon {
+    color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-2));
+    margin-right: var(--mantine-spacing-sm);
+    width: 25px;
+    height: 25px;
+}
+
+.grid{
+    margin-left: 0px
+}
+
+@media (min-width: 640px) {
+    .navbar {
+        visibility: visible;
+        width: 200px;
+    }
+    .grid{
+        margin-left: 200px;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .navbar {
+        visibility: visible;
+      width: 250px;
+    }
+    .grid{
+        margin-left: 250px;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .navbar {
+        visibility: visible;
+      width: 300px;
+    }
+    .grid{
+        margin-left: 300px;
+    }
+  }
