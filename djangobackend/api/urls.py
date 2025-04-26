@@ -6,5 +6,7 @@ urlpatterns = [
     path("postimage/<str:setname>", views.PostImage, name="upload"),
     path("getallimages", views.GetAllImages, name="retrieve"),
     path("getimagesets", views.GetImageSets, name="retrieve_imgsets"),
-    path("getimages/<str:setname>", views.GetImageBySet, name="getimages")
+    path("getimages/<str:setname>", views.GetImageBySet, name="getimages"),
+    path("postimageset", views.CreateImageSet, name="create set"),
+    path("deleteimageset", views.DeleteImageSet, name="delete set")
 ]

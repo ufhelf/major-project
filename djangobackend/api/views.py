@@ -30,10 +30,25 @@ def GetAllImages(request): #Get all images, for testing only
 @api_view(["GET"])
 def GetImageSets(request):
     sets = ImageSet.objects.all()
-    #set = ImageSet.objects.get(setname="set1")
-    #print(set.setname)
-    s = ImageSetSerialiser(sets, many=True)
+    s = ImageSetSerialiser(sets, many=True, context={'request': request})
     return Response(s.data)
+
+@api_view(["POST"])
+def CreateImageSet(request):
+    data = request.data
+    ImageSet.objects.create(setname=data["name"], date=data["date"])
+    return Response({"message": "Imageset created successfully"})
+
+@api_view(["DELETE"])
+def DeleteImageSet(request):
+    data = request.data
+    imgset = ImageSet.objects.get(setname=data.get("name"))
+
+    #Delete all images in the set
+    UploadImage.objects.filter(setname=imgset).delete()
+    imgset.delete()
+
+    return Response({"message": "Imageset deleted successfully"})
 
 @api_view(["GET"])
 def GetImageBySet(request, setname):
