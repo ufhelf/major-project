@@ -6,7 +6,6 @@ import '@mantine/core/styles.css';
 import '@mantine/carousel/styles.css';
 import { Button, MantineProvider, Checkbox, Text, TextInput } from "@mantine/core"
 import { Carousel, CarouselSlide } from "@mantine/carousel"
-import { HeaderThing } from "@/components/pagecomponents/header";
 
 async function getData(username : string) {
   const res = await fetch("http://127.0.0.1:8000/api/siteusers/");

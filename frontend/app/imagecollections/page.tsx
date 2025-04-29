@@ -38,6 +38,17 @@ async function PostImageSet(name: string, date: Date) {
             method: 'POST',
             body: formdata,
         });
+
+        if(response.status == 409){
+            notifications.show({
+                title: 'An imageset already exists with that name',
+                color: "red",
+                message: `Name: ${name}`,
+            })
+
+            console.log("Error: Requested name already exists")
+            return;
+        }
         
         if (!response.ok) {
             throw new Error('Failed to create imageset');
@@ -145,12 +156,8 @@ export default function BadgeCard() {
     }
 
     function DeleteSet() {
-        const formdata = new FormData();
-        formdata.append("name", deleteTarget);
-    
-        fetch(`http://127.0.0.1:8000/api/deleteimageset`, {
+        fetch(`http://127.0.0.1:8000/api/deleteimageset/${deleteTarget}`, {
             method: "DELETE",
-            body: formdata,
         })
         .then((response) => {
             if (!response.ok) {

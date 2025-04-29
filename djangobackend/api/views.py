@@ -5,6 +5,7 @@ from .models import *
 from .serializers import *
 from rest_framework.response import Response
 from api.serializers import UserSerializer
+import os
 
 @api_view(['GET'])
 def get_user(request, username, password):
@@ -20,9 +21,10 @@ def PostImage(request, setname):
     img_set = ImageSet.objects.get(setname=setname)
     image = UploadImage.objects.create(filename=uploaded_file.name, image=uploaded_file, setname=img_set)
     return JsonResponse({"message": "Image saved successfully"})
+
     
 @api_view(["GET"])
-def GetAllImages(request): #Get all images, for testing only
+def GetAllImages(request): #Get all images, for testing only => pls dont actually use this
     images = UploadImage.objects.all()
     serializer = ImageSerializer(images, many=True, context={'request': request})
     return Response(serializer.data)
@@ -33,22 +35,80 @@ def GetImageSets(request):
     s = ImageSetSerialiser(sets, many=True, context={'request': request})
     return Response(s.data)
 
+@api_view(["GET"])
+def getimageset(request, name):
+    s = ImageSet.objects.get(setname=name)
+    s = ImageSetSerialiser(s, context={'request': request})
+    return Response(s.data)
+
 @api_view(["POST"])
 def CreateImageSet(request):
     data = request.data
-    ImageSet.objects.create(setname=data["name"], date=data["date"])
-    return Response({"message": "Imageset created successfully"})
+
+    try:
+        ImageSet.objects.get(setname=data.get("name"))
+        return Response(status=HTTPStatus.CONFLICT)
+    except: 
+        ImageSet.objects.create(setname=data["name"], date=data["date"])
+        return Response({"message": "Imageset created successfully"})
 
 @api_view(["DELETE"])
-def DeleteImageSet(request):
+def DeleteImage(request, setname):
     data = request.data
-    imgset = ImageSet.objects.get(setname=data.get("name"))
+    s = ImageSet.objects.get(setname=setname)
+    img = UploadImage.objects.get(setname=s, filename=data.get("name"))
 
-    #Delete all images in the set
-    UploadImage.objects.filter(setname=imgset).delete()
+    if img.image:
+        image_path = img.image.path
+        if os.path.exists(image_path):
+            os.remove(image_path)
+
+    img.delete()
+    return Response({"message": "Imageset deleted successfully"})
+
+@api_view(["DELETE"])
+def DeleteImageSet(request, name):
+    imgset = ImageSet.objects.get(setname=name)
+
+    if imgset.coverImage:
+        cover_image_path = imgset.coverImage.path
+        if os.path.exists(cover_image_path):
+            os.remove(cover_image_path)
+    
+    #Get all images from this imageset
+    imgs = UploadImage.objects.filter(setname=imgset)
+
+    #Delete the image stored on the server
+    for img in imgs:
+        if img.image:
+            image_path = img.image.path
+            if os.path.exists(image_path):
+                os.remove(image_path)
+
+    #remove from db
+    imgs.delete()
     imgset.delete()
 
     return Response({"message": "Imageset deleted successfully"})
+
+@api_view(["PUT"])
+def ChangeImageSetCover(request, name):
+    uploaded_file = request.FILES.get('file')
+    imgset = ImageSet.objects.get(setname=name)
+
+    try:
+        imgset = ImageSet.objects.get(setname=name)
+    except ImageSet.DoesNotExist:
+        return Response({"error": "Image set not found"}, status=HTTPStatus.NOT_FOUND)
+    
+    if imgset.coverImage:
+        old_image_path = imgset.coverImage.path
+        if os.path.exists(old_image_path):
+            os.remove(old_image_path)
+    imgset.coverImage = uploaded_file
+    imgset.save()
+
+    return Response({"message": "Cover image updated successfully"})
 
 @api_view(["GET"])
 def GetImageBySet(request, setname):

@@ -4,9 +4,9 @@ import '@mantine/dropzone/styles.css';
 import { useEffect, useState } from 'react';
 import { Group, Text, Select } from '@mantine/core';
 import { IconUpload, IconPhoto, IconX } from '@tabler/icons-react';
-import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from '@mantine/dropzone';
+import { Dropzone, DropzoneProps, FileWithPath, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 
-async function PostImages(files : any, set : string) {
+async function PostImages(files : Array<FileWithPath>, set : string) {
     console.log('accepted', files)
 
     for(var i = 0; i < files.length; i++){
