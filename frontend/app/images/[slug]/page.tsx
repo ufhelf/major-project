@@ -1,5 +1,7 @@
 'use client'
+
 import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
@@ -9,7 +11,8 @@ import {
   IconUpload, 
   IconSettings,
   IconPhoto, 
-  IconX
+  IconX,
+  IconTrash,
 } from '@tabler/icons-react';
 
 import { 
@@ -28,14 +31,19 @@ import {
   Transition,
   Box,
   Grid,
-  LoadingOverlay
+  LoadingOverlay,
+  TextInput,
+  Affix,
+  Card
 } from '@mantine/core';
 
 import { Dropzone, IMAGE_MIME_TYPE, FileWithPath } from '@mantine/dropzone';
 
 import { useDisclosure, useHover } from '@mantine/hooks';
 import classes from './page.module.css'
+import { notifications } from '@mantine/notifications';
 import { GalleryImage } from '@/components/pagecomponents/galleryimg';
+import { DateInput } from '@mantine/dates';
 
 const defaultImage = "https://images.unsplash.com/photo-1739276364069-568b35ea578e?q=80&w=3164&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
 
@@ -44,6 +52,29 @@ type PageProps = {
     slug: string;
   };
 };
+
+async function ChangeImageSet(name:string, date:Date, currentName:string){
+  const formData = new FormData()
+  formData.append("name", name)
+  formData.append("date", date.toISOString().split("T")[0])
+  fetch(`http://127.0.0.1:8000/api/changeimageset/${currentName}`, {
+    method: "PUT",
+    body: formData,
+  })
+  .then(res => {
+    if(res.ok){
+      console.log("ok")
+      return true;
+    }
+    notifications.show({
+      title: 'Error',
+      color: "red",
+      message: `Imageset change failed`,
+    })
+
+    return false;
+  })
+}
 
 export default function Home() {
   const params = useParams();
@@ -57,8 +88,16 @@ export default function Home() {
   const [coverImg, setCoverImg] = useState(defaultImage)
   const [imgset, setImgset] = useState({})
 
+  const [name, setName] = useState('')
+  const [date, setDate] = useState(new Date())
+
   const [openedBurger, { toggle }] = useDisclosure();
   const [openedUpload, { open : openUpload, close : closeUpload }] = useDisclosure(false);
+  const [openedSettings, { open : openSettings, close : closeSettings }] = useDisclosure(false);
+
+  //Used for select mode
+  const [selected, setSelected] = useState([])
+  const [isSelectMode, setSelectMode] = useState(false)
 
   const fetchImageSet = () => {
     fetch(`http://127.0.0.1:8000/api/getimageset/${slug}`)
@@ -102,6 +141,22 @@ export default function Home() {
     }, 200)
   }
 
+  function HandleSave(){
+    //Prevent reloading to changed name
+    if(!ChangeImageSet(name, date, slug)) return;
+
+    router.replace(`/images/${name}`)
+    fetchImageSet()
+    setDate(new Date(imgset["date"]))
+    closeSettings()
+  }
+
+  function HandleClose(){
+    setName(slug)
+    setDate(new Date(imgset["date"]))
+    closeSettings()
+  }
+
   async function PostImages(files : Array<FileWithPath>) {
     console.log('accepted', files)
 
@@ -115,8 +170,17 @@ export default function Home() {
             body: formData,
         })
         .then(response => response.json())
-        .then(data => console.log(data))
-        .catch(error => console.error(error));
+        .then(data => 
+          notifications.show({
+            title: 'Image successfully uploaded',
+            message: `Name: ${file.name}`,
+        }))
+        .catch(error => 
+          notifications.show({
+            title: 'Failed to upload file',
+            color:"red",
+            message: `Name: ${file.name}`,
+        }));
     }
 
     setTimeout(() => {
@@ -132,9 +196,20 @@ export default function Home() {
       body: formData,
     })
     .then(response => response.json())
-    .then(data => console.log(data))
-    .catch(error => console.error(error));
+    .then(data => 
+      notifications.show({
+        title: 'Image successfully deleted',
+        message: `Name: ${imgname}`,
+    }))
+    .catch(error => 
+      notifications.show({
+        title: 'Failed to deletefile',
+        color:"red",
+        message: `Name: ${imgname}`,
+    }));
 
+    //Make sure server recieved stuff, add a pause 
+    //Prob wont work when server is slowwwwwwww
     setTimeout(() => {
       fetchImages();
     }, 200)
@@ -146,7 +221,38 @@ export default function Home() {
 
     //Fetch images
     fetchImages()
+    setName(slug)
+
+    console.log(date)
   }, []);
+
+  useEffect(() => {
+    if (imgset?.date) {
+      setDate(new Date(imgset.date));
+    }
+  }, [imgset]);
+
+  function handleSelectItem(name: string) {
+    setSelected((prevSelected) => {
+      // Avoid duplicates
+      if (!prevSelected.includes(name)) {
+        return [...prevSelected, name];
+      }
+      return prevSelected;
+    });
+    setSelectMode(true);
+  }
+  
+  function handleRemoveItem(name: string) {
+    setSelected((prevSelected) => {
+      const updated = prevSelected.filter((item) => item !== name);
+      // Turn off select mode if no items remain
+      if (updated.length === 0) {
+        setSelectMode(false);
+      }
+      return updated;
+    });
+  }
 
   return (
     <>
@@ -170,7 +276,7 @@ export default function Home() {
             hiddenFrom="sm"
             size="sm"
             />
-            <Title order={2} style={{fontWeight:500}}>{slug}</Title>
+            <Title order={2} style={{fontWeight:500}}>{slug.replace("%20", " ")}</Title>
           </Group>
         </AppShell.Header>
 
@@ -235,7 +341,7 @@ export default function Home() {
               <IconUpload/>
               Upload Images
             </Button>
-            <Button justify='left' fullWidth variant='subtle' color='grey'>
+            <Button justify='left' fullWidth variant='subtle' color='grey' onClick={openSettings}>
               <IconSettings/>
               Settings
             </Button>
@@ -258,8 +364,10 @@ export default function Home() {
                         image={item.image} 
                         title={item.filename}
                         index={index}
-                        onSelect={() => console.log("select")}
-                        onDeselect={() => console.log("deselect")}
+                        isSelectMode={isSelectMode}
+                        isSelected={selected.includes(item.filename)}
+                        onSelect={() => handleSelectItem(item.filename)}
+                        onDeselect={() => handleRemoveItem(item.filename)}
                         onDelete={() => DeleteImage(item.filename)}
                         />
                     </Grid.Col>
@@ -304,6 +412,50 @@ export default function Home() {
         </Group>
       </Dropzone>
     </Modal>
+
+    <Modal opened={openedSettings} onClose={HandleClose} title="Settings">
+        <TextInput label="Name" value={name} onChange={(e) => setName(e.currentTarget.value)} variant='filled'/>
+        <br/>
+        <DateInput label="Date" value={date} onChange={(e) => setDate(e)} variant='filled'/>
+        <br/>
+        <Button onClick={HandleSave}>Save</Button>
+    </Modal>
+
+    <Affix position={{ bottom: 20}} style={{ left: '50%', transform: 'translateX(-50%)'}}>
+      <Transition mounted={isSelectMode} transition="slide-up" duration={200} timingFunction="ease">
+        {(styles) => (
+          <Group style={styles}>
+            <Card shadow="sm" padding="md">
+              <Group>
+                <Button
+                  color="red"
+                  leftSection={<IconTrash size={16} />}
+                  onClick={() => {
+                    selected.forEach(value => DeleteImage(value))
+                    setSelected([]);
+                    setSelectMode(false);
+                  }}
+                  >
+                  Delete ({selected.length})
+                </Button>
+
+                <Button
+                  variant="default"
+                  leftSection={<IconX size={16} />}
+                  onClick={() => {
+                    setSelected([]);
+                    setSelectMode(false);
+                  }}
+                >
+                  Cancel
+              </Button>
+              </Group>
+            </Card>
+          </Group>
+        )}
+      </Transition>
+    </Affix>
+
     </>
   );
 }

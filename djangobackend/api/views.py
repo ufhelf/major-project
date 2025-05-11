@@ -110,6 +110,21 @@ def ChangeImageSetCover(request, name):
 
     return Response({"message": "Cover image updated successfully"})
 
+@api_view(["PUT"])
+def ChangeImageSet(request, name):
+    data = request.data
+    imgset = ImageSet.objects.get(setname=name)
+
+    try:
+        imgset.setname = data.get("name")
+    except: pass
+
+    try:
+        imgset.date = data.get("date")
+    except: pass
+    imgset.save()
+    return Response({"message": "imgset updated"})
+
 @api_view(["GET"])
 def GetImageBySet(request, setname):
     try:

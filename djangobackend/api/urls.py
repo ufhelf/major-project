@@ -13,5 +13,6 @@ urlpatterns = [
     path("postimageset", views.CreateImageSet, name="createSet"),
     path("deleteimageset/<str:name>", views.DeleteImageSet, name="deleteSet"),
     path("getimageset/<str:name>", views.getimageset, name="getimgset"),
-    path("setcoverimage/<str:name>", views.ChangeImageSetCover, name="changecoverimage")
+    path("setcoverimage/<str:name>", views.ChangeImageSetCover, name="changecoverimage"),
+    path("changeimageset/<str:name>", views.ChangeImageSet, name="changeimageset")
 ]

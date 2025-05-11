@@ -1,6 +1,22 @@
 'use client'
-import { IconPlus, IconSwitchHorizontal, IconLogout } from '@tabler/icons-react';
-import { Modal, Grid, Group, Title, TextInput, Box, Button, Text } from '@mantine/core';
+
+import { 
+    IconPlus, 
+    IconSwitchHorizontal, 
+    IconLogout 
+} from '@tabler/icons-react';
+
+import { 
+    Modal, 
+    Grid, 
+    Group, 
+    Title, 
+    TextInput, 
+    Box, 
+    Button, 
+    Text 
+} from '@mantine/core';
+
 import { notifications } from '@mantine/notifications';
 import { DatePickerInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
@@ -77,6 +93,7 @@ export default function BadgeCard() {
     const [active, setActive] = useState('');
     const [name, setName] = useState('');
     const [selected, setSelected] = useState([])
+    const [isSelectMode, setSelectMode] = useState(false)
     const [date, setDate] = useState<Date | null>(null);
 
     const [opened, { open, close }] = useDisclosure(false);
@@ -226,10 +243,15 @@ export default function BadgeCard() {
 
     const handleRemoveItem = name => {
         setSelected(selected.filter(item => item.name !== name))
+
+        if(selected.length == 0){
+            setSelectMode(false)
+        }
     }
 
     const handleSelectItem = name =>{
         setSelected(old => [...old, name])
+        setSelectMode(true)
     }
 
     return (
@@ -294,7 +316,11 @@ export default function BadgeCard() {
         {
             imgsets.map((item) => 
                 <Grid.Col span={{ base: 12, md: 4, lg: 3, sm: 6, xs: 6 }} key={item["setname"]}>
-                    <CollectionCard image={item["coverImage"]} title={item["setname"]} date={item["date"]} imageCount={item["image_count"].toString()}
+                    <CollectionCard 
+                    image={item["coverImage"]} 
+                    title={item["setname"]} 
+                    date={item["date"]}
+                    imageCount={item["image_count"].toString()}
                     onSelect={() => handleSelectItem(item)}
                     onDeselect={() => handleRemoveItem(item)}
                     onDelete={confirmDeletion}/>
