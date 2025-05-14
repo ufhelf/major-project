@@ -25,6 +25,7 @@ import { useEffect, useState } from "react";
 import classes from './page.module.css';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
+import { useRouter } from 'next/navigation';
 
 const defaultImage = "https://images.unsplash.com/photo-1739276364069-568b35ea578e?q=80&w=3164&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
 
@@ -88,7 +89,6 @@ async function PostImageSet(name: string, date: Date) {
     }
 }
 
-
 export default function BadgeCard() {
     const [active, setActive] = useState('');
     const [name, setName] = useState('');
@@ -103,6 +103,45 @@ export default function BadgeCard() {
     //Errors
     const [nameError, setNameError] = useState('')
     const [dateError, setDateError] = useState('')
+
+    const router = useRouter()
+
+    const getCsrfToken = () => {
+      return document.cookie.split(';').find(cookie => cookie.trim().startsWith('csrftoken=')).split('=')[1];
+    };
+
+    async function checkLoggedIn() {
+        
+        const res = await fetch("http://127.0.0.1:8000/api/whoami", {
+            credentials: "include",
+        });
+        if (res.ok) {
+            const data = await res.json();
+            alert("User is logged in as: " + data["username"]);
+        } else {
+            alert("Not logged in");
+            // redirect to login page
+        }
+    }
+
+    async function logout(){
+        const csrfToken = getCsrfToken();
+        const res = await fetch("http://localhost:3000/api/logout_user", {
+            method: "POST",
+            credentials: "include", 
+            headers: {
+                "X-CSRFToken": csrfToken,
+            },
+        });
+
+        if (!res.ok) {
+            console.error("Failed to log out");
+            return;
+        }
+
+        alert("You have successfully logged out");
+        router.replace("/login")
+    }
 
     const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const rawValue = event.currentTarget.value;
@@ -208,6 +247,7 @@ export default function BadgeCard() {
     
 
     useEffect(() => {
+        checkLoggedIn()
         fetchImageSets();
     }, []);
 
@@ -274,7 +314,7 @@ export default function BadgeCard() {
                 <span>Change account</span>
                 </a>
 
-                <a href="#" className={classes.link} onClick={(event) => event.preventDefault()}>
+                <a href="#" className={classes.link} onClick={(event) => logout()}>
                 <IconLogout className={classes.linkIcon} stroke={1.5} />
                 <span>Logout</span>
                 </a>

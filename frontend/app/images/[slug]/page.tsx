@@ -3,8 +3,7 @@
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 import { 
   IconArrowLeft, 
@@ -75,6 +74,7 @@ async function ChangeImageSet(name:string, date:Date, currentName:string){
     return false;
   })
 }
+
 
 export default function Home() {
   const params = useParams();
@@ -216,14 +216,14 @@ export default function Home() {
   }
 
   useEffect(() => {
+    //Check if user is logged in first
+    
     //Fetch imageset data
     fetchImageSet()
 
     //Fetch images
     fetchImages()
     setName(slug)
-
-    console.log(date)
   }, []);
 
   useEffect(() => {

@@ -1,19 +1,42 @@
 from http import HTTPStatus
 from django.http import HttpResponse, JsonResponse, QueryDict
+from django.contrib.auth.decorators import login_required
 from rest_framework.decorators import api_view
 from .models import *
 from .serializers import *
 from rest_framework.response import Response
-from api.serializers import UserSerializer
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout
+from django.views.decorators.csrf import ensure_csrf_cookie
 import os
 
-@api_view(['GET'])
-def get_user(request, username, password):
-    try:
-        user = SiteUser.objects.get(username=username, password=password)
-    except SiteUser.DoesNotExist:
-        return Response(status=HTTPStatus.NOT_FOUND)
-    return Response(UserSerializer(user).data)
+@ensure_csrf_cookie
+def get_csrf_token(request):
+    return JsonResponse({'message': 'CSRF cookie set'})
+
+@login_required
+def whoami(request):
+    print(request.user.username)
+    return JsonResponse({"username": request.user.username})
+
+@api_view(['POST'])
+def authenticate_user(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    user = authenticate(request, username=username, password=password)
+    if user is not None:
+        login(request, user)
+        return JsonResponse({'message': 'Authenticated', 'username': user.username})
+    else:
+        return JsonResponse({'error': 'Invalid credentials'}, status=401)
+
+@api_view(['POST'])
+def logout_user(request):
+    logout(request)
+    response = JsonResponse({'message': 'Logged out'})
+    response.delete_cookie('sessionid')
+    return response
 
 @api_view(["POST"])
 def PostImage(request, setname):   

@@ -2,7 +2,10 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("siteusers/<str:username>&<str:password>", views.get_user, name="auth"),
+    path("authenticate_user", views.authenticate_user, name="auth"),
+    path("logout_user", views.logout_user, name="logout"),
+    path("whoami", views.whoami, name="whoami"),
+    path("get_csrf_token", views.get_csrf_token, name="get_csrf_token"),
 
     path("postimage/<str:setname>", views.PostImage, name="upload"),
     path("getallimages", views.GetAllImages, name="retrieve"),
