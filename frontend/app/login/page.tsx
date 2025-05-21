@@ -10,9 +10,11 @@ import {
     Text,
     TextInput,
     Title,
+    Alert,
   } from '@mantine/core';
 
 import classes from './AuthenticationImage.module.css';
+import { IconAlertCircle } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -20,8 +22,11 @@ export default function AuthenticationImage() {
     const [usernameInput, setUsername] = useState("")
     const [passwordInput, setPassword] = useState("")
 
+    const [isFailed, setFailed] = useState(false)
+
     const router = useRouter()
 
+    //chatgpt gave me this
     const getCsrfToken = () => {
       return document.cookie.split(';').find(cookie => cookie.trim().startsWith('csrftoken=')).split('=')[1];
     };
@@ -29,7 +34,7 @@ export default function AuthenticationImage() {
     const tryLogin = async () => {
       await fetch("http://localhost:3000/api/get_csrf_token", {
         method: "GET",
-        credentials: "include", // So the cookie is stored
+        credentials: "include",
       });
 
       const formData = new FormData();
@@ -41,16 +46,17 @@ export default function AuthenticationImage() {
       const res = await fetch("http://localhost:3000/api/authenticate_user", {
         method: "POST",
         body: formData,
-        credentials: "include",  // Ensure cookies are included
+        credentials: "include",
         headers: {
-          "X-CSRFToken": csrfToken,  // Send the CSRF token in the header
+          "X-CSRFToken": csrfToken, 
         },
       });
 
       const parsedResponse = await res.json();
 
       if (!res.ok) {
-        throw new Error("Failed to authenticate");
+        setFailed(true)
+        return;
       }
 
       console.log('Login success:', parsedResponse);
@@ -64,11 +70,44 @@ export default function AuthenticationImage() {
           <Title order={2} className={classes.title} ta="center" mt="md" mb={50}>
             Welcome back!
           </Title>
-  
-          <TextInput label="Username" placeholder="e.g John Doe" size="md" onChange={(event) => setUsername(event.currentTarget.value)}/>
-          <PasswordInput label="Password" placeholder="Your password" mt="md" size="md" onChange={(event) => setPassword(event.currentTarget.value)}/>
+
+          {isFailed && (
+            <>
+              <Alert
+                icon={<IconAlertCircle size="1rem" />}
+                title="Login failed"
+                color="red"
+                mt="md"
+              >
+                Invalid username or password.
+              </Alert>
+              <br/>
+            </>
+          )}
+
+          <TextInput 
+            name="username" 
+            label="Username" 
+            placeholder="e.g John Doe" 
+            autoComplete="username"
+            size="md" 
+            onChange={(event) => setUsername(event.currentTarget.value)}
+            value={usernameInput}
+          />
+          <PasswordInput 
+            name="password" 
+            label="Password" 
+            placeholder="Your password" 
+            autoComplete="current-password"
+            mt="md" 
+            size="md" 
+            onChange={(event) => setPassword(event.currentTarget.value)}
+            value={passwordInput}
+          />
+
           <Checkbox label="Keep me logged in" mt="xl" size="md" />
-          <Button fullWidth mt="xl" size="md" onClick={() => tryLogin()}>
+
+          <Button fullWidth mt="xl" size="md" type='submit' onClick={tryLogin}>
             Login
           </Button>
   

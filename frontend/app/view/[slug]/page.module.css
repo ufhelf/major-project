@@ -1,0 +1,13 @@
+.title{
+    z-index: 10; 
+    color: white;
+    bottom: 100px;
+    left: 2%;
+}
+
+.date{
+    z-index: 10; 
+    color: white;
+    bottom: 70px;
+    left: 2%;
+}

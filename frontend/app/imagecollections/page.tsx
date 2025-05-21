@@ -92,6 +92,9 @@ async function PostImageSet(name: string, date: Date) {
 export default function BadgeCard() {
     const [active, setActive] = useState('');
     const [name, setName] = useState('');
+    const [username, setUsername] = useState('');
+
+    //This stuff has no use rn
     const [selected, setSelected] = useState([])
     const [isSelectMode, setSelectMode] = useState(false)
     const [date, setDate] = useState<Date | null>(null);
@@ -111,16 +114,14 @@ export default function BadgeCard() {
     };
 
     async function checkLoggedIn() {
-        
-        const res = await fetch("http://127.0.0.1:8000/api/whoami", {
+        const res = await fetch("http://localhost:3000/api/whoami", {
             credentials: "include",
         });
         if (res.ok) {
             const data = await res.json();
-            alert("User is logged in as: " + data["username"]);
+            setUsername(data["username"])
         } else {
-            alert("Not logged in");
-            // redirect to login page
+            router.replace("/login")
         }
     }
 
@@ -135,11 +136,9 @@ export default function BadgeCard() {
         });
 
         if (!res.ok) {
-            console.error("Failed to log out");
             return;
         }
 
-        alert("You have successfully logged out");
         router.replace("/login")
     }
 
@@ -309,6 +308,8 @@ export default function BadgeCard() {
             </div>
 
             <div className={classes.footer}>
+                <Title className={classes.link} order={4}>Logged in as: {username}</Title>
+
                 <a href="#" className={classes.link} onClick={(event) => event.preventDefault()}>
                 <IconSwitchHorizontal className={classes.linkIcon} stroke={1.5} />
                 <span>Change account</span>

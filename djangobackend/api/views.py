@@ -20,6 +20,14 @@ def whoami(request):
     return JsonResponse({"username": request.user.username})
 
 @api_view(['POST'])
+def register_user(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    user = User.objects.create_user(username, "", password)
+    return JsonResponse({'message': 'Registered', 'username': user.username})
+
+@api_view(['POST'])
 def authenticate_user(request):
     username = request.data.get('username')
     password = request.data.get('password')
@@ -60,9 +68,12 @@ def GetImageSets(request):
 
 @api_view(["GET"])
 def getimageset(request, name):
-    s = ImageSet.objects.get(setname=name)
-    s = ImageSetSerialiser(s, context={'request': request})
-    return Response(s.data)
+    try:
+        s = ImageSet.objects.get(setname=name)
+        s = ImageSetSerialiser(s, context={'request': request})
+        return Response(s.data)
+    except:
+        return HTTPStatus.NOT_FOUND
 
 @api_view(["POST"])
 def CreateImageSet(request):

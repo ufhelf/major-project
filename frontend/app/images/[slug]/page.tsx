@@ -52,28 +52,38 @@ type PageProps = {
   };
 };
 
-async function ChangeImageSet(name:string, date:Date, currentName:string){
-  const formData = new FormData()
-  formData.append("name", name)
-  formData.append("date", date.toISOString().split("T")[0])
-  fetch(`http://127.0.0.1:8000/api/changeimageset/${currentName}`, {
-    method: "PUT",
-    body: formData,
-  })
-  .then(res => {
-    if(res.ok){
-      console.log("ok")
+async function ChangeImageSet(name: string, date: Date, currentName: string): Promise<boolean> {
+  const formData = new FormData();
+  formData.append("name", name);
+  formData.append("date", date.toISOString().split("T")[0]);
+
+  try {
+    const res = await fetch(`http://127.0.0.1:8000/api/changeimageset/${currentName}`, {
+      method: "PUT",
+      body: formData,
+    });
+
+    if (res.ok) {
+      console.log("ok");
       return true;
+    } else {
+      notifications.show({
+        title: 'Error',
+        color: "red",
+        message: `Imageset change failed`,
+      });
+      return false;
     }
+  } catch (error) {
     notifications.show({
       title: 'Error',
       color: "red",
-      message: `Imageset change failed`,
-    })
-
+      message: `Network or server error: ${(error as Error).message}`,
+    });
     return false;
-  })
+  }
 }
+
 
 
 export default function Home() {
@@ -141,13 +151,17 @@ export default function Home() {
     }, 200)
   }
 
-  function HandleSave(){
+  async function HandleSave(){
     //Prevent reloading to changed name
-    if(!ChangeImageSet(name, date, slug)) return;
+    const res = await ChangeImageSet(name, date, slug)
 
-    router.replace(`/images/${name}`)
-    fetchImageSet()
-    setDate(new Date(imgset["date"]))
+    if(res && slug != name){
+      router.replace(`/images/${name}`)
+    }
+    else{
+      fetchImageSet()
+      setDate(new Date(imgset["date"]))
+    }
     closeSettings()
   }
 
