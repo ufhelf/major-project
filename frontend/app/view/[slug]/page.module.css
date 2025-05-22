@@ -11,3 +11,27 @@
     bottom: 70px;
     left: 2%;
 }
+
+.viewImage{
+    position: absolute;
+    height: 90vh;
+    object-fit: contain;
+}
+
+@media (min-width: 240px){
+    .viewImage{
+        height: auto;
+    }
+    .arrows{
+        display:none;
+    }
+}
+
+@media (min-width: 640px){
+    .viewImage{
+        height: 90vh;
+    }
+    .arrows{
+        display: inline;
+    }
+}

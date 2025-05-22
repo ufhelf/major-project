@@ -109,6 +109,17 @@ export default function Home() {
   const [selected, setSelected] = useState([])
   const [isSelectMode, setSelectMode] = useState(false)
 
+  async function checkLoggedIn() {
+      const res = await fetch("http://localhost:3000/api/whoami", {
+          credentials: "include",
+      });
+      if (res.ok) {
+          const data = await res.json();
+      } else {
+          router.replace("/login")
+      }
+  }
+
   const fetchImageSet = () => {
     fetch(`http://127.0.0.1:8000/api/getimageset/${slug}`)
     .then(res => {
@@ -231,7 +242,7 @@ export default function Home() {
 
   useEffect(() => {
     //Check if user is logged in first
-    
+    checkLoggedIn()
     //Fetch imageset data
     fetchImageSet()
 
@@ -291,6 +302,11 @@ export default function Home() {
             size="sm"
             />
             <Title order={2} style={{fontWeight:500}}>{slug.replace("%20", " ")}</Title>
+          </Group>
+
+          <Group className='ml-auto pr-5'>
+            <Button color='black' variant='subtle' onClick={() => router.replace(`/view/${slug}`)}>Preview</Button>
+            <Button variant='filled' radius="xs" color='green'>Share</Button>
           </Group>
         </AppShell.Header>
 

@@ -113,7 +113,7 @@ export default function AuthenticationImage() {
   
           <Text ta="center" mt="md">
             Don&apos;t have an account?{' '}
-            <Anchor<'a'> href="#" fw={700} onClick={(event) => event.preventDefault()}>
+            <Anchor<'a'> href="/register" fw={700}>
               Register
             </Anchor>
           </Text>
