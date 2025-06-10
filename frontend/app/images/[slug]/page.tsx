@@ -54,7 +54,7 @@ type PageProps = {
 
 async function ChangeImageSet(name: string, date: Date, currentName: string): Promise<boolean> {
   const formData = new FormData();
-  formData.append("name", name);
+  formData.append("name", name.replace("%20", " ")); //There will be an error if %20 isnt replaced. This line is for extra safety
   formData.append("date", date.toISOString().split("T")[0]);
 
   try {
@@ -177,7 +177,7 @@ export default function Home() {
   }
 
   function HandleClose(){
-    setName(slug)
+    setName(slug.replace("%20", " "))
     setDate(new Date(imgset["date"]))
     closeSettings()
   }
@@ -248,7 +248,7 @@ export default function Home() {
 
     //Fetch images
     fetchImages()
-    setName(slug)
+    setName(slug.replace("%20", " ")) //Replace to avoid error
   }, []);
 
   useEffect(() => {
@@ -292,7 +292,7 @@ export default function Home() {
 
         <AppShell.Header style={{display:"flex"}}>
           <Group className='mx-2'>
-            <ActionIcon variant='subtle' size="xl" onClick={(e) => router.back()} color='black'>
+            <ActionIcon variant='subtle' size="xl" onClick={(e) => router.replace("/imagecollections")} color='black'>
               <IconArrowLeft size={35} stroke={1.5}/>
             </ActionIcon>
             <Burger
@@ -305,7 +305,7 @@ export default function Home() {
           </Group>
 
           <Group className='ml-auto pr-5'>
-            <Button color='black' variant='subtle' onClick={() => router.replace(`/view/${slug}`)}>Preview</Button>
+            <Button color='black' variant='subtle' onClick={() => window.location.replace(`/view/${name}`)}>Preview</Button>
             <Button variant='filled' radius="xs" color='green'>Share</Button>
           </Group>
         </AppShell.Header>

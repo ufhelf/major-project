@@ -1,4 +1,4 @@
-import { Overlay, Card, Transition, Group, Image, Text, AspectRatio, Checkbox, Menu, Button} from '@mantine/core';
+import { Overlay, Card, Transition, Group, Text, AspectRatio, Image, Checkbox, Menu, Button} from '@mantine/core';
 import { motion } from 'framer-motion';
 import { useHover } from '@mantine/hooks';
 import { useState } from 'react';
@@ -8,12 +8,14 @@ export interface imgprops{
     image: string,
     title: string,
     index: Number,
+    gridSize: Number,
 };
 
 export const ViewImage = ({
     image,
     title,
     index,
+    gridSize,
 }: imgprops ) => {
     const { hovered, ref } = useHover();
 
@@ -23,11 +25,12 @@ export const ViewImage = ({
     });
 
     return(
+        <>
         <motion.div
             ref={ref2}
             initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.4, delay: (index%6) * 0.05 }}
+            transition={{ duration: 0.4, delay: (index%(12/gridSize)) * 0.05 }}
         >
         <AspectRatio mx="auto" ratio={1 / 1} ref={ref}>
             <div className="relative w-full h-full">
@@ -42,5 +45,6 @@ export const ViewImage = ({
             </div>
         </AspectRatio>
         </motion.div>
+        </>
     )
 };
