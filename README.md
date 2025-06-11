@@ -6,7 +6,6 @@ Open 2 seperate terminals (one for backend, one for frontend)
 - django rest framework
 - nextjs
 - node
-- 
 ## Frontend
 On a new terminal, enter
 ```
