@@ -11,7 +11,7 @@ Open 2 seperate terminals (one for backend, one for frontend)
 On a new terminal, enter
 ```
 cd frontend
-npm install next@latest react@latest react-dom@latest –legacy-peer-deps
+npm install next@latest react@latest react-dom@latest --legacy-peer-deps
 ```
 To run the frontend,
 ```
